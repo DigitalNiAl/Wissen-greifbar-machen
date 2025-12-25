@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Handpose Test</title>
+</head>
+<body>
+<video id="video" autoplay playsinline style="width:320px;height:240px;"></video>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.18.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+<script>
+const video = document.getElementById('video');
+
+async function setupCamera() {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    return new Promise(resolve => video.onloadedmetadata = () => resolve(video));
+}
+
+async function main() {
+    await setupCamera();
+    video.play();
+
+    const model = await handpose.load();
+    console.log("Handpose geladen");
+
+    async function checkHands() {
+        const predictions = await model.estimateHands(video);
+        console.log(predictions); // <-- Hier sieht man, ob Hand erkannt wird
+        requestAnimationFrame(checkHands);
+    }
+
+    checkHands();
+}
+
+main();
+</script>
+</body>
+</html>
